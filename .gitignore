@@ -163,3 +163,5 @@ input/*.csv
 input/examples/*-local.xml
 output/*/*.xml
 output/*/*.csv
+output/.DS_Store
+.DS_Store
