@@ -106,7 +106,7 @@ print("Checking if customers exists in source XML...")
 # Iterate through each customer ID from the CSV
 for index, row in csv_df.iterrows():
     current_id = str(row['current_customer_id'])
-    new_id = row['new_customer_id'].strip()
+    new_id = str(row['new_customer_id']).strip()
     # Initialize log row
     log_row = {'current_id': current_id, 'new_id': new_id, 'status': '', 'reason': ''}
     
@@ -116,14 +116,14 @@ for index, row in csv_df.iterrows():
         # Customer found in XML, process as before...
         customers_found_in_xml += 1
         print(f"Customer found: '{current_id}' >> '{new_id}'")
-        current_id = customer.get('id')
+        current_id = str(customer.get('id')).strip()
 
         if current_id in customer_ids_from_csv:
             row = csv_df.loc[csv_df['current_customer_id'].astype(str) == current_id].iloc[0]
-            new_id = row['new_customer_id'].strip()
-            new_store_id = row['new_store_id'].strip()
-            new_store_name = row['new_store_name'].strip()
-            new_source_id = row['new_source_id'].strip()
+            new_id = str(row['new_customer_id']).strip
+            new_store_id = str(row['new_store_id']).strip()
+            new_store_name = str(row['new_store_name']).strip()
+            new_source_id = str(row['new_source_id']).strip()
             mandatory_ref = row['mandatory_reference']
             
             # Update the customer ID
