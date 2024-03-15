@@ -120,15 +120,15 @@ for index, row in csv_df.iterrows():
 
         if current_id in customer_ids_from_csv:
             row = csv_df.loc[csv_df['current_customer_id'].astype(str) == current_id].iloc[0]
-            new_id = str(row['new_customer_id']).strip
-            new_store_id = str(row['new_store_id']).strip()
-            new_store_name = str(row['new_store_name']).strip()
-            new_source_id = str(row['new_source_id']).strip()
+            new_id = row['new_customer_id']
+            new_store_id = row['new_store_id']
+            new_store_name = row['new_store_name']
+            new_source_id = row['new_source_id']
             mandatory_ref = row['mandatory_reference']
             
             # Update the customer ID
             customer.attrib['id'] = str(new_id)
-            log_row = {'current_id': current_id, 'new_id': new_id, 'status': '', 'reason': 'Found in source XML file'}
+            log_row = {'current_id': current_id, 'new_id': str(new_id), 'status': '', 'reason': 'Found in source XML file'}
             
             ## Find and update the specified customer attributes
             # Flag to check if the attribute exists
