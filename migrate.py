@@ -1,7 +1,7 @@
 '''
-ETL Tool for Migrating Customers to a New Sales Channel in Intershop
+ETL Tool for Migrating Customers to a New Sales Channel
 
-This script is designed to facilitate the migration of customer data from an old or current sales channel to a new sales channel within the Intershop platform. It automates the transformation and loading of customer data, ensuring a seamless transition with minimal manual intervention.
+This script is designed to facilitate the migration of customer data from an old or current sales channel to a new sales channel within the platform. It automates the transformation and loading of customer data, ensuring a seamless transition with minimal manual intervention.
 
 Input (Mandatory):
 1. A full XML export of customer data from the old/current sales channel (e.g., Mekonomen B2B NO). This file should contain comprehensive customer information, including attributes, addresses, user accounts, and customer segments.
@@ -21,7 +21,7 @@ Processing Steps:
 7. The script also handles the removal of outdated attributes like 'LastOrderDate' and 'last-logged-in' to ensure the data aligns with the requirements of the new sales channel.
 8. Upon completion of the data transformation, the script generates a new XML file containing the migrated customer data. This file, along with a detailed migration log in CSV format, is saved to a designated output directory.
 
-This tool streamlines the customer migration process, ensuring data integrity and consistency across sales channels in Intershop environments.
+This tool streamlines the customer migration process, ensuring data integrity and consistency across sales channels in environments.
 '''
 
 import pandas as pd
