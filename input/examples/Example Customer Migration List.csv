@@ -1,5 +1,5 @@
 current_customer_id,new_customer_id,new_source_id,new_store_id,new_store_name,mandatory_reference,delivery_day
-401419,X401419X,XSourceID01,XStoreID02,BCP NO Test,true,
-128756,X128756X,XSourceID01,XStoreID02,BCP NO Test,false,
+401419,X401419X,XSourceID01,XStoreID02,BCP NO Test,true,-3D
+128756,X128756X,XSourceID01,XStoreID02,BCP NO Test,false,-3D
 412347,X412347X,XSourceID01,XStoreID02,BCP NO Test,false,
 4123Ö47,X412347X,XSourceID01,XStoreID02,BCP NO Test,true,

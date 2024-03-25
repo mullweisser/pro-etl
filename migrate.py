@@ -132,15 +132,22 @@ for index, row in csv_df.iterrows():
             mandatory_ref = row['mandatory_reference']
             delivery_day = row['delivery_day']
             
-            if any(value is None for value in [new_id, new_store_id, new_store_name, new_source_id, mandatory_ref]):
+            # Checks for empty fields in the CSV input
+            if any(value is None for value in [new_id, new_store_id, new_store_name, new_source_id]):
                 error_flag = True
                 error_reason = "Missing values!"
                 
-            
-            if not re.match(r"^-?\d$", delivery_day):
-                error_flag = True
-                error_reason = "Invalid delivery day format! - Eg: '-1D'"
-            
+            # Assuming delivery_day might be a float, string, or None
+            print(f'Debug delivery_day: {delivery_day}')
+
+            if delivery_day == "" or delivery_day is None or pd.isna(delivery_day):
+                delivery_day = "-3D"
+            else:
+                # Convert delivery_day to string to ensure compatibility with re.match()
+                delivery_day_str = str(delivery_day)
+                if not re.match(r"-\b[1-9]D\b", delivery_day_str):
+                    error_flag = True
+                    error_reason = "Invalid delivery day format! - Eg: '-1D’"
             
             # Update the customer ID
             customer.attrib['id'] = str(new_id)
@@ -192,8 +199,8 @@ for index, row in csv_df.iterrows():
                     new_mek_attr.text = str(delivery_day)
                     new_mek_attr.set(f"{{{ns['dt']}}}dt", "string")  # Ensuring the dt:dt="boolean" attribute is set
                     
-            # If the MEK_DefaultDeliveryday attribute was not found, create and append it
-            if not mek_customer_order_number_mandatory_exists and mandatory_ref is not None:
+            # If the MEK_CustomerOrderNumberMandatory attribute was not found, create and append it
+            if not mek_customer_order_number_mandatory_exists and mandatory_ref is not None and pd.notna(mandatory_ref):
                 custom_attributes_element = customer.find('.//i:custom-attributes', ns)
                 if custom_attributes_element is None:
                     custom_attributes_element = etree.SubElement(customer, f"{{{ns['i']}}}custom-attributes")

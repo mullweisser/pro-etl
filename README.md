@@ -21,6 +21,7 @@ This Python script is designed to automate the migration of customer data from a
     | new_store_id        | New store ID                                                          | Yes       | SP1     |
     | new_store_name      | New store name                                                        | Yes       | Store B |
     | mandatory_reference | If customer order number is mandatory when placing order in catalogue | No        | true    |
+    | delivery_day        | Lead time calculation. If empty then default value (-3D) is applied   | No        | -2D     |
 
 
 ## Output
