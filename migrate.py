@@ -29,6 +29,7 @@ from lxml import etree
 from datetime import datetime
 import os
 import uuid
+import re
 
 # Set execution identifier
 run_id = str(uuid.uuid4())
@@ -120,11 +121,33 @@ for index, row in csv_df.iterrows():
 
         if current_id in customer_ids_from_csv:
             row = csv_df.loc[csv_df['current_customer_id'].astype(str) == current_id].iloc[0]
+            
+            # Error flag for later validation
+            error_flag = False
+            
             new_id = row['new_customer_id']
             new_store_id = row['new_store_id']
             new_store_name = row['new_store_name']
             new_source_id = row['new_source_id']
             mandatory_ref = row['mandatory_reference']
+            delivery_day = row['delivery_day']
+            
+            # Checks for empty fields in the CSV input
+            if any(value is None for value in [new_id, new_store_id, new_store_name, new_source_id]):
+                error_flag = True
+                error_reason = "Missing values!"
+                
+            # Assuming delivery_day might be a float, string, or None
+            print(f'Debug delivery_day: {delivery_day}')
+
+            if delivery_day == "" or delivery_day is None or pd.isna(delivery_day):
+                delivery_day = "-3D"
+            else:
+                # Convert delivery_day to string to ensure compatibility with re.match()
+                delivery_day_str = str(delivery_day)
+                if not re.match(r"-\b[1-9]D\b", delivery_day_str):
+                    error_flag = True
+                    error_reason = "Invalid delivery day format! - Eg: '-1D’"
             
             # Update the customer ID
             customer.attrib['id'] = str(new_id)
@@ -133,6 +156,7 @@ for index, row in csv_df.iterrows():
             ## Find and update the specified customer attributes
             # Flag to check if the attribute exists
             mek_customer_order_number_mandatory_exists = False
+            mek_deliveryday_exists = False
             
             for attr in customer.findall('.//i:custom-attribute', ns):
                 if attr.get('name') == 'MEK_Company' and attr.text == 'Mekonomen':
@@ -153,9 +177,30 @@ for index, row in csv_df.iterrows():
                 elif attr.get('name') == 'MEK_CustomerOrderNumberMandatory' and mandatory_ref is not None:
                     attr.text = str(mandatory_ref)
                     mek_customer_order_number_mandatory_exists = True
+                    
+                elif attr.get('name') == 'MEK_DefaultDeliveryday' and delivery_day is not None:
+                    attr.text = str(delivery_day)
+                    mek_deliveryday_exists = True
+                
             
+            # If the MEK_DefaultDeliveryday attribute was not found, create and append it
+            if not mek_deliveryday_exists and delivery_day is not None:
+                custom_attributes_element = customer.find('.//i:custom-attributes', ns)
+                if custom_attributes_element is None:
+                    custom_attributes_element = etree.SubElement(customer, f"{{{ns['i']}}}custom-attributes")
+                mek_attr = custom_attributes_element.find('.//i:custom-attribute[@name="MEK_DefaultDeliveryday"]', ns)
+                if mek_attr is not None:
+                    # Update existing attribute
+                    mek_attr.text = str(delivery_day)
+                    mek_attr.set(f"{{{ns['dt']}}}dt", "string")  # Ensuring the dt:dt="boolean" attribute is set
+                else:
+                    # Add new attribute
+                    new_mek_attr = etree.SubElement(custom_attributes_element, f"{{{ns['i']}}}custom-attribute", name="MEK_DefaultDeliveryday")
+                    new_mek_attr.text = str(delivery_day)
+                    new_mek_attr.set(f"{{{ns['dt']}}}dt", "string")  # Ensuring the dt:dt="boolean" attribute is set
+                    
             # If the MEK_CustomerOrderNumberMandatory attribute was not found, create and append it
-            if not mek_customer_order_number_mandatory_exists and mandatory_ref is not None:
+            if not mek_customer_order_number_mandatory_exists and mandatory_ref is not None and pd.notna(mandatory_ref):
                 custom_attributes_element = customer.find('.//i:custom-attributes', ns)
                 if custom_attributes_element is None:
                     custom_attributes_element = etree.SubElement(customer, f"{{{ns['i']}}}custom-attributes")
@@ -211,7 +256,10 @@ for index, row in csv_df.iterrows():
             # Append modified customer to new_root
             new_root.append(etree.fromstring(etree.tostring(customer)))
             
-        log_row.update({'status': 'OK'})
+        if error_flag:
+            log_row.update({'status': 'Not OK', 'reason': f'Invalid value! Please check CSV input file ({error_reason})'}) 
+        else:
+            log_row.update({'status': 'OK'})
     else:
         # Customer not found in XML
         print(f'Customer not found in source XML: {current_id}')
